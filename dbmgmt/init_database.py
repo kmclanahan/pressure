@@ -1,3 +1,6 @@
+# This script will drop all the data in the travel_info table and recreate the database
+# DO NOT RUN THIS UNLESS YOU WANT TO LOSE ALL THE DATA!!!
+
 import psycopg2
 
 
