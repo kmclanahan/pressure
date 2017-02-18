@@ -18,7 +18,7 @@ all_data = cur.fetchall()
 with open(filename, 'w') as outfile:
     for data in all_data:
 
-        outfile.write('"""%s""","""%s""","""%s""","""%s""","""%s""","""%s""","""%s"""' 
+        outfile.write('"""%s""","""%s""","""%s""","""%s""","""%s""","""%s""","""%s"""\n' 
                     %(data[0], data[1], data[2], data[3], data[4], data[5], data[6]) )
 
         count += 1
