@@ -37,7 +37,7 @@ class WordCounter(Bolt):
 
             cur = conn.cursor()
 
-            cur.execute("INSERT INTO Twitter_Data (tweet, location, country, language, coordinates, threat_type) VALUES ( %s, %s, %s, %s, %s, %s)", (tweet, location, country, language, coords, 'None'))
+            cur.execute("INSERT INTO Twitter_Data (ts, tweet, location, country, language, coordinates, threat_type) VALUES ( now(), %s, %s, %s, %s, %s, %s)", (tweet, location, country, language, coords, 'None'))
 
             conn.commit()
             conn.close()
