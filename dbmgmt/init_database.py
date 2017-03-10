@@ -20,7 +20,7 @@ conn.close()
 conn = psycopg2.connect(dbname="travel_info", user="postgres", password="pass1234", host="localhost", port="5432")
 cur = conn.cursor()
 cur.connection.set_isolation_level(0)
-cur.execute("CREATE TABLE Twitter_Data(id serial PRIMARY KEY, t_timestamp timestamp, tweet varchar, location varchar, country varchar, language varchar, coordinates varchar, threat_type varchar)")
+cur.execute("CREATE TABLE Twitter_Data(id serial PRIMARY KEY, ts timestamp, tweet varchar, location varchar, country varchar, language varchar, coordinates varchar, threat_type varchar)")
 
 cur.close()
 
