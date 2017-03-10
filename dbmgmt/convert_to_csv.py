@@ -23,7 +23,7 @@ all_data = cur.fetchall()
 with open(filename, 'w') as outfile:
     for data in all_data:
 
-        dbid, tweet, loc_name, country, language, coords, ttype = data
+        dbid, ts, tweet, loc_name, country, language, coords, ttype = data
 
         tweet = re.sub('\n', '', tweet)
 
@@ -43,8 +43,8 @@ with open(filename, 'w') as outfile:
                       float(c_list[5].strip("{}")) +
                       float(c_list[7].strip("{}")))
 
-        outfile.write('%s,%s,%s,%s,"""%s"""\n' 
-                    %(dbid, language, lattitude, longitude, tweet) )
+        outfile.write('%s,%s,%s,%s,%s,"""%s"""\n' 
+                    %(dbid, ts, language, lattitude, longitude, tweet) )
 
         count += 1
 
