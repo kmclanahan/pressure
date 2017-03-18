@@ -21,8 +21,19 @@ class WordCounter(Bolt):
         location = tup.values[1]
         country = tup.values[2]
         language = tup.values[3]
-        coords = tup.values[4]
+        coords = tup.values[4][0]
 
+        longitude = 0.25*(float(coords[0][0]) +
+                          float(coords[1][0]) +
+                          float(coords[2][0]) +
+                          float(coords[3][0]) )
+
+
+        latitude = 0.25*(float(coords[0][1]) +
+                         float(coords[1][1]) +
+                         float(coords[2][1]) +
+                         float(coords[3][1]) )
+ 
         printable = set(string.printable)
         tweet = filter(lambda x: x in printable, tweet)
         location = filter(lambda x: x in printable, location)
@@ -37,7 +48,7 @@ class WordCounter(Bolt):
 
             cur = conn.cursor()
 
-            cur.execute("INSERT INTO Twitter_Data (ts, tweet, location, country, language, coordinates, threat_type) VALUES ( now(), %s, %s, %s, %s, %s, %s)", (tweet, location, country, language, coords, 'None'))
+            cur.execute("INSERT INTO Twitter_Data (ts, tweet, location, country, language, coordinates, threat_type, latitude, longitude) VALUES ( now(), %s, %s, %s, %s, %s, %s, %s, %s)", (tweet, location, country, language, coords, 'None', latitude, longitude))
 
             conn.commit()
             conn.close()
