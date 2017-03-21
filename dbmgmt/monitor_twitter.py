@@ -105,7 +105,11 @@ def update_grid_averages():
     for idx in tweet_grid:
         tweet_grid_averages[idx] = []
         for values in tweet_grid[idx]:
-            tweet_grid_averages[idx].append(sum(values)/float(len(values)))
+            avg_values = filter(lambda x: x!= 0, values)
+            if len(avg_values) != 0:
+                tweet_grid_averages[idx].append(sum(avg_values)/float(len(avg_values)))
+            else:
+                tweet_grid_averages[idx].append(0)
 
 #connect to the database and calculate the tweet counts per square per hour
 conn = psycopg2.connect(database="travel_info", user="postgres", password="pass1234", host="localhost", port="5432")
@@ -138,12 +142,14 @@ while start_time < end_time:
 update_grid_averages()
 
 if (DEBUG):
-    for idx in tweet_grid_averages:
-        print "---(%s,%s)---" %idx
-        print "---tweet_grid---"
-        print tweet_grid[idx]
-        print "----averages----"
-        print tweet_grid_averages[idx]
+    for i in range(lat_grid):
+        for j in range(long_grid):
+            idx = (i,j)
+            print "---(%s,%s)---" %idx
+            print "---tweet_grid---"
+            print tweet_grid[idx]
+            print "----averages----"
+            print tweet_grid_averages[idx]
 
 #emter monitoring loop
 loop_freq_mins = 1
