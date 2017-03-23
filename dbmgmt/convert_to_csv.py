@@ -23,28 +23,13 @@ all_data = cur.fetchall()
 with open(filename, 'w') as outfile:
     for data in all_data:
 
-        dbid, ts, tweet, loc_name, country, language, coords, ttype = data
+        dbid, ts, tweet, loc_name, country, language, coords, ttype, longitude, latitude = data
 
         tweet = re.sub('\n', '', tweet)
+        tweet = re.sub('"', '', tweet)
 
-        c_list = coords.split(',')
-    
-        if len(c_list) != 8:
-            print "Error calculating lat,long"
-            break            
-    
-        longitude = 0.25*(float(c_list[0].strip("{}")) +
-                      float(c_list[2].strip("{}")) +
-                      float(c_list[4].strip("{}")) +
-                      float(c_list[6].strip("{}")))
-                
-        lattitude = 0.25*(float(c_list[1].strip("{}")) +
-                      float(c_list[3].strip("{}")) +
-                      float(c_list[5].strip("{}")) +
-                      float(c_list[7].strip("{}")))
-
-        outfile.write('%s,%s,%s,%s,%s,"""%s"""\n' 
-                    %(dbid, ts, language, lattitude, longitude, tweet) )
+        outfile.write('%s,%s,%s,%s,%s,"%s"\n' 
+                    %(dbid, ts, language, latitude, longitude, tweet) )
 
         count += 1
 
