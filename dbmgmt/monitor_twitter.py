@@ -1,4 +1,10 @@
 import psycopg2, datetime, time
+from nltk.tokenize import word_tokenize
+import re, operator, string
+from collections import Counter
+from nltk.corpus import stopwords
+
+######### CONSTANTS #######
 
 DEBUG = True
 
@@ -18,6 +24,8 @@ day_hist = 7
 
 lat_grid_len = dist_lat/lat_grid
 long_grid_len = dist_long/long_grid
+
+####### HELPER FUNCTIONS #######
 
 #calculates lat/long from the coordinates of the tweet
 def get_lat_long(coords):
@@ -60,6 +68,13 @@ def get_grid_index(lat_long_tup):
 
     return( (lat_idx, long_idx) )
 
+def get_lat_long_from_sector(idx):
+    lower_lat = start_lat + lat_grid_len*idx[0]
+    upper_lat = start_lat + lat_grid_len*(idx[0]+1)
+    lower_long = start_long + long_grid_len*idx[1]
+    upper_long = start_long + long_grid_len*(idx[1]+1)
+    return [lower_lat, lower_long, upper_lat, upper_long]
+
 def update_grid(start_time):
     delta_time = start_time + delta
 
@@ -86,6 +101,64 @@ def update_grid(start_time):
         if len(tweet_grid[idx][hour % 24]) >= day_hist:
             tweet_grid[idx][hour % 24] = tweet_grid[idx][hour % 24][1:]
         tweet_grid[idx][hour % 24].append(temp_grid[idx])
+
+emoticons_str = r"""
+    (?:
+        [:=;] #eyes
+        [oO\-] #nose
+        [D\)\]\(\]/\\OpP] #mouth
+    )"""
+
+
+regex_str = [
+    emoticons_str,
+    r'<[^>]+>', # HTML tags
+    r'(?:@[\w_]+)', # @-mentions
+    r"(?:\#+[\w_]+[\w\'_\-]*[\w_]+)", # hash-tags
+    r'http[s]?://(?:[a-z]|[0-9]|[$-_@.&amp;+]|[!*\(\),]|(?:%[0-9a-f][0-9a-f]))+', # URLs
+
+    r'(?:(?:\d+,?)+(?:\.?\d+)?)', # numbers
+    r"(?:[a-z][a-z'\-_]+[a-z])", # words with - and '
+    r'(?:[\w_]+)', # other words
+    r'(?:\S)' # anything else
+]
+
+tokens_re = re.compile(r'('+'|'.join(regex_str)+')', re.VERBOSE | re.IGNORECASE)
+emoticon_re = re.compile(r'^'+emoticons_str+'$', re.VERBOSE | re.IGNORECASE)
+punctuation = list(string.punctuation)
+stop = stopwords.words('english') + punctuation + ['rt','via']
+
+def tokenize(s):
+    return tokens_re.findall(s)
+
+def preprocess(s, lowercase=False):
+    tokens = tokenize(s)
+    if lowercase:
+        tokens = [token if emoticon.re.search(token) else token.lower() for token in tokens]
+    return tokens
+
+def get_most_common_words(tweet_list, num):
+    count_all = Counter()
+    for tweet in tweet_list:
+        #create a list with all the terms
+        terms_all = [term for term in preprocess(tweet[0]) if term not in stop
+                     and not term.startswith(('#', '@', 'http'))]
+        #update the counter
+        count_all.update(terms_all)
+    #print the first 20 most frequent words
+    return count_all.most_common(num)
+
+def get_most_common_hashtags(tweet_list, num):
+    count_all = Counter()
+    for tweet in tweet_list:
+        #create a list with all the terms
+        terms_all = [term for term in preprocess(tweet[0]) if term.startswith('#')]
+        #update the counter
+        count_all.update(terms_all)
+    #print the first 20 most frequent words
+    return count_all.most_common(num)
+
+####### MONITORING APPLICATION #######
 
 #initialze the grid with empty arrays
 tweet_grid = {}
@@ -171,16 +244,21 @@ while True:
 
     time_diff = current_time - start_time
 
+    #now check to see if any counts are abnormally high
+    conn = psycopg2.connect(database="travel_info", user="postgres", password="pass1234", host="localhost", port="5432")
+    cur = conn.cursor()
+
+    #clean up old tweet spike data
+    cur.execute("Truncate Tweet_Spike_Data")
+    cur.execute("Truncate Tweet_Spike_Text")
+
+
     #if an hour has passed, update the grid
     if time_diff.seconds > (60 * 60):
         print "Updating grid history..."
         update_grid(start_time)
         update_grid_averages()
-        start_time += delta
-
-    #now check to see if any counts are abnormally high
-    conn = psycopg2.connect(database="travel_info", user="postgres", password="pass1234", host="localhost", port="5432")
-    cur = conn.cursor()
+        start_time = current_time 
 
     one_hour_ago = current_time - delta
 
@@ -204,6 +282,7 @@ while True:
     #get the right hour index into the grid
     hour_idx = get_hour_idx(current_time)
 
+    spike_idx = 1
     for idx in tweet_grid_averages:
         baseline = tweet_grid_averages[idx][hour_idx] + 1
         observed = temp_grid[idx] + 1
@@ -215,12 +294,33 @@ while True:
 
         if percent_increase > 300:
             print ">300%% increase for sector (%s,%s): observed %s, baseline %s" %(idx[0], idx[1], observed, baseline)
-        elif percent_increase > 200:
-            print ">200%% increase for sector (%s,%s): observed %s, baseline %s" %(idx[0], idx[1], observed, baseline)
-        elif percent_increase > 100:
-            print ">100%% increase for sector (%s,%s): observed %s, baseline %s" %(idx[0], idx[1], observed, baseline)
-        elif percent_increase > 50:
-            print ">50%% increase for sector (%s,%s): observed %s, baseline %s" %(idx[0], idx[1], observed, baseline)
+            boundaries = get_lat_long_from_sector(idx)
+
+            latitude = (boundaries[0] + boundaries[2]) / 2
+            longitude = (boundaries[1] + boundaries[3]) / 2
+
+            cur.execute("SELECT tweet, ts, latitude, longitude FROM Twitter_Data WHERE latitude > '%s' and latitude < '%s' and longitude > '%s' and longitude < '%s' and ts > '%s' and ts < '%s'" %(boundaries[0], boundaries[2], boundaries[1], boundaries[3], one_hour_ago, current_time))
+
+            all_data = cur.fetchall()
+
+            print "Top 10 words:"
+            top_words = get_most_common_words(all_data, 10)
+            print top_words
+            print "Top 10 hashtags:"
+            top_hashes = get_most_common_hashtags(all_data, 10)
+            print top_hashes
+
+            #add the data to the spike table
+            cur.execute("INSERT INTO Tweet_Spike_Data (idx, ts, grid_idx, spike_percent, top_words, top_hashes, latitude, longitude) VALUES ( %s, now(), %s, %s, %s, %s, %s, %s)", (spike_idx, idx, percent_increase, top_words, top_hashes, latitude, longitude))
+
+            #add the tweet text 
+            for data in all_data:
+                tweet, ts, latitude, longitude = data
+                cur.execute("INSERT INTO Tweet_Spike_Text (ts, spike_idx, tweet, latitude, longitude) VALUES ( %s, %s, %s, %s, %s)", (ts, spike_idx, tweet, latitude, longitude))
+
+            spike_idx += 1
+ 
+
 
     conn.commit()
     conn.close()
