@@ -25,6 +25,8 @@ day_hist = 7
 lat_grid_len = dist_lat/lat_grid
 long_grid_len = dist_long/long_grid
 
+tweet_percent_threshold = 200
+min_term_length = 3
 ####### HELPER FUNCTIONS #######
 
 #calculates lat/long from the coordinates of the tweet
@@ -142,7 +144,8 @@ def get_most_common_words(tweet_list, num):
     for tweet in tweet_list:
         #create a list with all the terms
         terms_all = [term for term in preprocess(tweet[0]) if term not in stop
-                     and not term.startswith(('#', '@', 'http'))]
+                     and not term.startswith(('#', '@', 'http'))
+                     and len(term) > min_term_length]
         #update the counter
         count_all.update(terms_all)
     #print the first 20 most frequent words
@@ -152,7 +155,7 @@ def get_most_common_hashtags(tweet_list, num):
     count_all = Counter()
     for tweet in tweet_list:
         #create a list with all the terms
-        terms_all = [term for term in preprocess(tweet[0]) if term.startswith('#')]
+        terms_all = [term for term in preprocess(tweet[0]) if term.startswith('#') and len(term) > min_term_length]
         #update the counter
         count_all.update(terms_all)
     #print the first 20 most frequent words
@@ -292,8 +295,8 @@ while True:
         if observed - baseline < 10:
             continue
 
-        if percent_increase > 300:
-            print ">300%% increase for sector (%s,%s): observed %s, baseline %s" %(idx[0], idx[1], observed, baseline)
+        if percent_increase > tweet_percent_threshold:
+            print ">%s%% increase for sector (%s,%s): observed %s, baseline %s" %(tweet_percent_threshold, idx[0], idx[1], observed, baseline)
             boundaries = get_lat_long_from_sector(idx)
 
             latitude = (boundaries[0] + boundaries[2]) / 2
@@ -311,7 +314,7 @@ while True:
             print top_hashes
 
             #add the data to the spike table
-            cur.execute("INSERT INTO Tweet_Spike_Data (idx, ts, grid_idx, spike_percent, top_words, top_hashes, latitude, longitude) VALUES ( %s, now(), %s, %s, %s, %s, %s, %s)", (spike_idx, idx, percent_increase, top_words, top_hashes, latitude, longitude))
+            cur.execute("INSERT INTO Tweet_Spike_Data (idx, ts, grid_idx, baseline_level, current_level, spike_percent, top_words, top_hashes, latitude, longitude) VALUES ( %s, now(), %s, %s, %s, %s, %s, %s, %s, %s)", (spike_idx, idx, baseline, observed, percent_increase, top_words, top_hashes, latitude, longitude))
 
             #add the tweet text 
             for data in all_data:

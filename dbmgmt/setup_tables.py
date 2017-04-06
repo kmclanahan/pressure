@@ -15,7 +15,7 @@ try:
 except:
     pass
 
-cur.execute("CREATE TABLE Tweet_Spike_Data(idx integer, ts timestamp, grid_idx varchar, spike_percent float, top_words varchar, top_hashes varchar, latitude float, longitude float)")
+cur.execute("CREATE TABLE Tweet_Spike_Data(idx integer, ts timestamp, grid_idx varchar, baseline_level float, current_level float, spike_percent float, top_words varchar, top_hashes varchar, latitude float, longitude float)")
 
 cur.execute("CREATE TABLE Tweet_Spike_Text(id serial PRIMARY KEY, ts timestamp, spike_idx integer, tweet varchar, latitude float, longitude float)")
 
