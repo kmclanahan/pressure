@@ -149,7 +149,7 @@ def get_most_common_words(tweet_list, num):
         #update the counter
         count_all.update(terms_all)
     #print the first 20 most frequent words
-    return count_all.most_common(num)
+    return ' '.join(str(e[0]) for e in count_all.most_common(num))
 
 def get_most_common_hashtags(tweet_list, num):
     count_all = Counter()
@@ -159,7 +159,7 @@ def get_most_common_hashtags(tweet_list, num):
         #update the counter
         count_all.update(terms_all)
     #print the first 20 most frequent words
-    return count_all.most_common(num)
+    return ' '.join(str(e[0]) for e in count_all.most_common(num))
 
 ####### MONITORING APPLICATION #######
 
@@ -261,7 +261,7 @@ while True:
         print "Updating grid history..."
         update_grid(start_time)
         update_grid_averages()
-        start_time = current_time 
+        start_time += delta  
 
     one_hour_ago = current_time - delta
 
@@ -299,9 +299,6 @@ while True:
             print ">%s%% increase for sector (%s,%s): observed %s, baseline %s" %(tweet_percent_threshold, idx[0], idx[1], observed, baseline)
             boundaries = get_lat_long_from_sector(idx)
 
-            latitude = (boundaries[0] + boundaries[2]) / 2
-            longitude = (boundaries[1] + boundaries[3]) / 2
-
             cur.execute("SELECT tweet, ts, latitude, longitude FROM Twitter_Data WHERE latitude > '%s' and latitude < '%s' and longitude > '%s' and longitude < '%s' and ts > '%s' and ts < '%s'" %(boundaries[0], boundaries[2], boundaries[1], boundaries[3], one_hour_ago, current_time))
 
             all_data = cur.fetchall()
@@ -313,13 +310,21 @@ while True:
             top_hashes = get_most_common_hashtags(all_data, 10)
             print top_hashes
 
-            #add the data to the spike table
-            cur.execute("INSERT INTO Tweet_Spike_Data (idx, ts, grid_idx, baseline_level, current_level, spike_percent, top_words, top_hashes, latitude, longitude) VALUES ( %s, now(), %s, %s, %s, %s, %s, %s, %s, %s)", (spike_idx, idx, baseline, observed, percent_increase, top_words, top_hashes, latitude, longitude))
-
+            num_tweets, sum_lat, sum_long = 0,0,0
             #add the tweet text 
             for data in all_data:
                 tweet, ts, latitude, longitude = data
                 cur.execute("INSERT INTO Tweet_Spike_Text (ts, spike_idx, tweet, latitude, longitude) VALUES ( %s, %s, %s, %s, %s)", (ts, spike_idx, tweet, latitude, longitude))
+                sum_lat += latitude
+                sum_long += longitude
+                num_tweets += 1
+
+            #calculate the average lat/long for the tweet spike
+            latitude = sum_lat / num_tweets
+            longitude = sum_long / num_tweets 
+
+            #add the data to the spike table
+            cur.execute("INSERT INTO Tweet_Spike_Data (idx, ts, grid_idx, baseline_level, current_level, spike_percent, top_words, top_hashes, latitude, longitude) VALUES ( %s, now(), %s, %s, %s, %s, %s, %s, %s, %s)", (spike_idx, idx, baseline, observed, percent_increase, top_words, top_hashes, latitude, longitude))
 
             spike_idx += 1
  
