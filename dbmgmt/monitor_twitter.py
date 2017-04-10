@@ -125,10 +125,13 @@ regex_str = [
     r'(?:\S)' # anything else
 ]
 
+#naughty word list :)
+naughty_words = ['shit', 'fuck', 'cunt', 'fucker', 'asshole', 'fucking']
+
 tokens_re = re.compile(r'('+'|'.join(regex_str)+')', re.VERBOSE | re.IGNORECASE)
 emoticon_re = re.compile(r'^'+emoticons_str+'$', re.VERBOSE | re.IGNORECASE)
 punctuation = list(string.punctuation)
-stop = stopwords.words('english') + punctuation + ['rt','via']
+stop = stopwords.words('english') + punctuation + ['rt','via'] + naughty_words
 
 def tokenize(s):
     return tokens_re.findall(s)
