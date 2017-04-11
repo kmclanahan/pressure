@@ -1,0 +1,13 @@
+{
+  "name": "website-using-express",
+  "version": "0.0.1",
+  "scripts": {
+    "start": "node Server.js"
+  },
+  "dependencies": {
+    "express": "latest",
+    "google-auth-library": "^0.10.0",
+    "googleapis": "^16.1.0",
+    "mongodb": "^2.2.24"
+  }
+}
