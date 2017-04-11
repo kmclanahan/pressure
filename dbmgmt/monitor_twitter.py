@@ -16,8 +16,8 @@ dist_lat = end_lat - start_lat
 dist_long = end_long - start_long
 
 #change these to modify the resolution of the grid
-lat_grid = 20
-long_grid = 20
+lat_grid = 50
+long_grid = 50
 
 #how many days of history to track
 day_hist = 7
@@ -25,7 +25,7 @@ day_hist = 7
 lat_grid_len = dist_lat/lat_grid
 long_grid_len = dist_long/long_grid
 
-tweet_percent_threshold = 200
+tweet_percent_threshold = 500
 min_term_length = 3
 ####### HELPER FUNCTIONS #######
 
@@ -136,11 +136,9 @@ stop = stopwords.words('english') + punctuation + ['rt','via'] + naughty_words
 def tokenize(s):
     return tokens_re.findall(s)
 
-def preprocess(s, lowercase=False):
+def preprocess(s):
     tokens = tokenize(s)
-    if lowercase:
-        tokens = [token if emoticon.re.search(token) else token.lower() for token in tokens]
-    return tokens
+    return [token.lower() for token in tokens]
 
 def get_most_common_words(tweet_list, num):
     count_all = Counter()
