@@ -19,7 +19,7 @@
    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.9.0/math.min.js"></script>
    <link rel="stylesheet" type="text/css" href="/css/result-light.css">
    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-   <script src="http://maps.googleapis.com/maps/api/js?libraries=geometry&sensor=false"></script>
+
    <style type="text/css">
    .loading {
      margin-top: 10em;
@@ -33,8 +33,8 @@
    /* Always set the map height explicitly to define the size of the div
     * element that contains the map. */
    #map {
-        height: 75%;
-        width: 100%;
+        height: 80%;
+        width: 90%;
         margin-left: auto;
         margin-right: auto;
     }
@@ -86,8 +86,8 @@
 
    #alerts{
      background-color: black;
-     height: 15%;
-      width: 100%;
+     height: 7%;
+      width: 90%;
       overflow-y: scroll;
       scrollbar-base-color: #000;
       margin: 0  auto;
@@ -177,8 +177,6 @@
       </ul>
       <form class="navbar-form navbar-left">
         <button type="button"  class="btn btn-danger" onClick="sendDetails();">SOS</button>
-        <button type="button"  class="btn btn-primary" onClick="sendDetails();">EMBASSY</button>
-        <button type="button"  class="btn btn-success" onClick="sendDetails();">CONTACT</button>
       </form>
       <ul class="nav navbar-nav navbar-right">
         <!---<li><a href="#">Translate</a></li>--->
@@ -195,7 +193,23 @@
   </div><!-- /.container-fluid -->
 </nav>
 
-<div width="100%" style="background-color: #d9534f; display: none; width: 100%; margin: 0 auto; font-weight: bold; padding: 10px" id = "sos_details" >
+<br/>
+    <div  id="alerts">
+    </div>
+<div id="content" style="display: block"></div>
+
+<div id="myModal" class="modal">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <p>Some text in the Modal..</p>
+  </div>
+
+</div>
+
+
+<div width="90%" style="background-color: red; display: none; width: 90%; margin: 0 auto; font-weight: bold; padding: 10px" id = "sos_details" >
 	<center>
 	SOS ENGAGED:  SENDING POSITION INFO TO --
 	<span id="email"></span>
@@ -203,12 +217,12 @@
 	<span id="contact_name"></span>
 	<span id="contact_email"></span>
 	<span id="contact_phone"></span> <br>
-	<button type="button" class="btn-success" onClick="stopSOS();">STOP</button>
+	<button type="button" class="btn" onClick="stopSOS();">STOP</button>
 	</center>
 </div>
 
 
-<div style = "height:100%; padding: 0px; margin: 0px;" class="jumbotron">
+<div style = "height:100%; padding: 0px;" class="jumbotron">
     <div id="map"></div>
     <script>
 
@@ -319,8 +333,6 @@
             .append("li")
                  .html(function(d) { return "<a href='/?lat=" + d.Lat + "&lng=" + d.Long +"&feedurl="+ d.NewsFeed + "'>" +d.Country + "</a>" });
        });
-
-	//Turn on the SOS and send the information to the emergency contacts
 	function sendDetails(){
 		console.log('SOS');
         //Get the data from the database and populate.
@@ -345,17 +357,14 @@
                     contact_phone.innerHTML = contact_phone_text;
                 }
                 }});
-
 	 	document.getElementById("sos_details").style.display= 'block';
 	}
-
-	//Turn off the SOS mailings.
 	function stopSOS(){
 		console.log('STOP SOS');
 	 	document.getElementById("sos_details").style.display= 'none';	
 	}
 
-	//Draw the driving directions on the map
+
 	function drawDirections(mll_lat, mll_lng, ell_lat, ell_lng) {
 		var embLatLng = new google.maps.LatLng(ell_lat, ell_lng);
 		var myLatLng = new google.maps.LatLng(mll_lat, mll_lng);
@@ -378,7 +387,6 @@
 		});
 	}
 
-      //Show the tweets in the tweet spike popup
       function showTweets(spikeId, x){
       	  $.ajax({url: "/api/tweets/"+spikeId, success: function(result){
 		var tweetDiv = document.getElementById('tweets_'+x);
@@ -394,8 +402,6 @@
                 tweetDiv.style.display = "block";
       	  	}});
 	}
-	
-	//Show news function takes data from the handlr function, formats and displays it
 	function showNews(x){
 		console.log(country_news[x]);
 		elementId = 'news_' + x;
@@ -409,8 +415,7 @@
       		}
 	 	document.getElementById(elementId).style.display = 'block';
 	}
-	
-	//Get the country of the spike and also get the news for that country based on spike related lat/lng
+
 	function getCountry(x, spikeLL){
 	    var geocoder = new google.maps.Geocoder;
             geocoder.geocode({'location': spikeLL}, function(c_results, c_status) {
@@ -424,7 +429,7 @@
 		 var div_id = x;
         	  $.ajax({
 			//cx=017576662512468239146:omuauf_lfve
-        		url:'https://www.googleapis.com/customsearch/v1?key=AIzaSyBcc2O3mvsB8EmDbFeXmSda_vzRLrDz7IY&cx=004125819262731474818:4z9moaefaps&q=' +spikeLocation + '&sort=date-sdate',
+        		url:'https://www.googleapis.com/customsearch/v1?key=AIzaSyBcc2O3mvsB8EmDbFeXmSda_vzRLrDz7IY&cx=004125819262731474818:4z9moaefaps&q=' +spikeLocation,
         		type:"GET",
         		async:'true',
         		success:function (data) {
@@ -437,7 +442,7 @@
 	    });
       }
 
-     //Organize and display the news items returned from google news
+
      function hndlr(response, div_id) {
       for (var i = 0; i < response.items.length; i++) {
         var item = response.items[i];
@@ -453,9 +458,10 @@
         navigator.geolocation.getCurrentPosition(initialize,fail);
       }
 
-      //Initialize the Google map and set the center and zoom levels
+
       function initMap() {
        var embassyLatLng = {lat: -13.962460, lng: 33.785780};
+       
        var myLatLng = {lat: -13.0, lng: 33.0};
        
        urlVars = getUrlVars();
@@ -483,7 +489,8 @@
          mapTypeId: google.maps.MapTypeId.TERRAIN
       });
 
-      //Get spike data from the postgres database
+
+
       var spike_response;
       var safteyAlert = true;
       var alert_colors = ["red", "orange", "yellow", "maroon", "purple"];
@@ -509,7 +516,7 @@
 	if(safteyAlert){
 	if (spike_response.data.length == 0 ){
 	spike_content = "<div id='alert_s'" +
-                        " style='color: green; font-weight: bold; padding: 5px'>"+
+                        " style='color: green; font-weight: bold'>"+
    			"<div class='circle' style='float: left; background-color:green'> </div> " + 
 			" Saftey Alert: " +  "<span style='font-weight:normal; color: #ccc'>" + 
 		        "Currently no activity." + 
@@ -519,7 +526,7 @@
 	}
 	else{
 	spike_content = "<div id='alert_s'" + 
-                        " style='color: #ccc; font-weight: bold; padding: 5px'>" +
+                        " style='color: #ccc; font-weight: bold'>" +
    			"&nbsp;&nbsp;<div class='circle' style='float: left; background-color:green'> </div> " + 
 			" Saftey Alert: " +  "<span style='font-weight:normal;'>" + 
 		        "No activity spikes withing 500 km of your current position." + 
@@ -548,7 +555,7 @@
 
 	    //Create the alert text
 	    spike_content = "<div  id='alert_" + x + "'" + 
-                             " style='color: #ccc; font-weight: bold; overflow:hidden; padding: 5px;'>" + 
+                             " style='color: #ccc; font-weight: bold; overflow:hidden;'>" + 
     			     "<div class='outer-circle' style='float: left; background-color:" + alert_colors[x] + "'><div class='inner-circle'></div> </div> " + 
 			     "&nbsp;&nbsp;&nbsp;Activity Spike: " +
 			     "<span id='spikeLoc_" + x + "' style='font-weight: normal'>" + spikeLocation + "</span> | " + 
@@ -576,8 +583,7 @@
 	    	     "<div style='height: 70px; display: none; overflow: hidden; overflow-y: scroll;' id='news_" + x + "'></div>" +
 		     "<br>" +  
 		     "<a href='javascript:void(0);' onClick='showTweets(" + spike_response.data[x]['idx'] + "," +  x+ ")'>Show Tweets</a>" + 
-	    	     "<div style='height: 70px; display: none; overflow: hidden; overflow-y: scroll;' id='tweets_" + x + "'></div>" + "</br>" + 
-		     "<button type='button' class='btn-success'>Relevant</button>"
+	    	     "<div style='height: 70px; display: none; overflow: hidden; overflow-y: scroll;' id='tweets_" + x + "'></div>"
 		    
 		});
                 google.maps.event.addListener(marker, "click", function() {
@@ -712,7 +718,7 @@
    	while (currentTime + miliseconds >= new Date().getTime()) {
    		}
 	}
-	closestEmb = 100000;
+
 	for (var i = 0; i < data.length; i++) 
 	{
 		// Create a lat/long object readable by Google
@@ -723,7 +729,6 @@
 		
 
 		var embLatLng = new google.maps.LatLng(parseFloat(data[i][9]), parseFloat(data[i][10]));
-		var curLatLng = new google.maps.LatLng(mll_lat, mll_lng);
 
 		// Calculate the driving time between the current position and this embassy
                 //console.log(data[i][1] + myLatLng);
@@ -732,11 +737,6 @@
 		  destination : embLatLng,
 		  travelMode  : google.maps.DirectionsTravelMode.DRIVING
 		};
-                embDist = (google.maps.geometry.spherical.computeDistanceBetween(curLatLng, embLatLng) / 1000).toFixed(0);
-		if (embDist < closestEmb){
-			closestEmb = embDist;
-		}
-		console.log(closestEmb);
 		var distance = getDistance (request, myLatLng, embLatLng, data, i, mll_lat, mll_lng, ell_lat, ell_lng );
 	}	
        //END IMPORT EMBASSY DATA
@@ -751,8 +751,6 @@
 
 </script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBcc2O3mvsB8EmDbFeXmSda_vzRLrDz7IY&callback=initMap" async defer></script>
-    <div  id="alerts">
-    </div>
 
 
 </body>

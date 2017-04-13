@@ -1,59 +1,59 @@
-ID,Country,Capital,Lat,Long
-8,Algeria,Algiers,36.42,3.08
-16,Angola,Luanda,-8.5,13.15
-30,Benin,Porto Novo,6.23,2.42
-43,Botswana,Gaborone,-24.45,25.57
-19,Burkina Faso,Ouagadougou,12.15,-1.3
-32,Burundi,Bujumbura,-3.16,29.18
-17,Cameroon,Yaounde,3.5,11.35
-54,Cape Verde,Praia,15.02,-23.34
-36,Central African Republic,Bangui,4.23,18.35
-25,Chad,N'Djamena,12.1,14.59
-52,Comoros,Moroni,-11.4,43.16
-4,Democratic Republic of the Congo,Kinshasa,-4.2,15.15
-50,Djibouti,Djibouti,11.08,42.2
-3,Egypt,Cairo,30.01,31.14
-45,Equatorial Guinea,Malabo,3.45,8.5
-37,Eritrea,Asmara,15.19,38.55
-2,Ethiopia,Addis Ababa,9.02,38.42
-41,Gabon,Libreville,0.25,9.26
-46,Gambia,Banjul,13.28,-16.4
-12,Ghana,Accra,5.35,-0.06
-26,Guinea,Conakry,9.29,-13.49
-47,Guinea-Bissau,Bissau,11.45,-15.45
-14,Ivory Coast,Yamoussoukro,6.49,-5.17
-7,Kenya,Nairobi,-1.17,36.48
-44,Lesotho,Maseru,-29.18,27.3
-39,Liberia,Monrovia,6.18,-10.47
-34,Libya,Tripoli,32.49,13.07
-15,Madagascar,Antananarivo,-18.55,47.31
-21,Malawi,Lilongwe,-14,33.48
-20,Mali,Bamako,12.34,-7.55
-40,Mauritania,Nouakchott,-20.1,57.3
-48,Mauritius,Port Louis,-20.160891,57.501222
-55,Mayotte,Mamoudzou,-12.48,45.14
-11,Morocco,Rabat,33.97159,-6.849813
-13,Mozambique,Maputo,-25.58,32.32
-42,Namibia,Windhoek,-22.35,17.04
-18,Niger,Niamey,13.27,2.06
-1,Nigeria,Abuja,9.05,7.32
-38,Republic of the Congo,Brazzaville,-4.09,15.12
-51,Reunion (France), Saint-Denis,-20.89066,55.455054
-28,Rwanda,Kigali,-1.59,30.04
-58,"Saint Helena, Ascension and Tristan da Cunha (UK)",Jamestown,-15.928634,-5.715175
-56,Sao Tome and Principe,Sao Tome,0.1,6.39
-23,Senegal,Dakar,14.34,-17.29
-57,Seychelles,Victoria,-4.619143,55.451315
-35,Sierra Leone,Freetown,8.3,-13.17
-31,Somalia,Mogadishu,2.02,45.25
-5,South Africa,Pretoria,-25.44,28.12
-29,South Sudan,Juba,4.859363,31.57125
-10,Sudan,Khartoum,15.31,32.35
-49,Swaziland,Mbabane ,-26.18,31.06
-6,Tanzania,Dodoma,-6.162959,35.751607
-33,Togo,Lome,6.09,1.2
-27,Tunisia,Tunis,36.5,10.11
-9,Uganda,Kampala,0.2,32.3
-53,Western Sahara,El-Aaiún,25.3496917,-16.2541693
-22,Zambia,Lusaka,-15.28,28.16
-24,Zimbabwe,Harare,-17.43,31.02
+ID,Country,Capital,Lat,Long,NewsFeed
+8,Algeria,Algiers,36.42,3.08,http://world.einnews.com/rss/q3jioOB5LImMD-f0
+16,Angola,Luanda,-8.5,13.15,http://world.einnews.com/rss/Yd8h7ngIKj5owwZO
+30,Benin,Porto Novo,6.23,2.42,http://world.einnews.com/rss/hX0bdiD6AQIwGbfo
+43,Botswana,Gaborone,-24.45,25.57,http://world.einnews.com/rss/dc7WqKS2ODlxZErI
+19,Burkina Faso,Ouagadougou,12.15,-1.3,http://world.einnews.com/rss/NkTHRU_pBsmiVdM2
+32,Burundi,Bujumbura,-3.16,29.18,http://world.einnews.com/rss/7Bp2wEJh1oCgMeFF
+17,Cameroon,Yaounde,3.5,11.35,http://world.einnews.com/rss/ZgW6Oty9p0elnysY
+54,Cape Verde,Praia,15.02,-23.34,http://world.einnews.com/rss/pEBZRmrUyvZqqFLA
+36,Central African Republic,Bangui,4.23,18.35,http://world.einnews.com/rss/pEBZRmrUyvZqqFLA
+25,Chad,N'Djamena,12.1,14.59,http://world.einnews.com/rss/_P3ZKLGXk__hi9y2
+52,Comoros,Moroni,-11.4,43.16,http://world.einnews.com/rss/Ph1dtSnT42FRh1Q_
+4,Democratic Republic of the Congo,Kinshasa,-4.2,15.15,http://world.einnews.com/rss/5Q8lXMWacBfgdDI5
+50,Djibouti,Djibouti,11.08,42.2,http://world.einnews.com/rss/nqaG-7UKjHFdvimL
+3,Egypt,Cairo,30.01,31.14,http://world.einnews.com/rss/E2vw0MKhYmzjyOaq
+45,Equatorial Guinea,Malabo,3.45,8.5,http://world.einnews.com/rss/TZRNCAwx0PAcLIBW
+37,Eritrea,Asmara,15.19,38.55,http://world.einnews.com/rss/sKvXX3P6ZxpVd7bh
+2,Ethiopia,Addis Ababa,9.02,38.42,http://world.einnews.com/rss/pw8mdKcM2dGKg-ce
+41,Gabon,Libreville,0.25,9.26,http://world.einnews.com/rss/V_3nlTgIf2SbazJo
+46,Gambia,Banjul,13.28,-16.4,
+12,Ghana,Accra,5.35,-0.06,
+26,Guinea,Conakry,9.29,-13.49,
+47,Guinea-Bissau,Bissau,11.45,-15.45,
+14,Ivory Coast,Yamoussoukro,6.49,-5.17,
+7,Kenya,Nairobi,-1.17,36.48,http://world.einnews.com/rss/6e9IfFH6VJRnR4Jw
+44,Lesotho,Maseru,-29.18,27.3,http://world.einnews.com/rss/FPOu9F9ZZqcHVkso
+39,Liberia,Monrovia,6.18,-10.47,http://world.einnews.com/rss/qfn0y8U7hGkX6VlQ
+34,Libya,Tripoli,32.49,13.07,http://world.einnews.com/rss/PeT4iMJD2zcwfeYb
+15,Madagascar,Antananarivo,-18.55,47.31,
+21,Malawi,Lilongwe,-14,33.48,http://world.einnews.com/rss/JR0YAaWSr-RAqw8t
+20,Mali,Bamako,12.34,-7.55,http://world.einnews.com/rss/QYvP60KOXEcferFd
+40,Mauritania,Nouakchott,-20.1,57.3,http://world.einnews.com/rss/YKRcUKiJqp7EAFx_
+48,Mauritius,Port Louis,-20.160891,57.501222,http://world.einnews.com/rss/J8_G1trkGU9iyFLJ
+55,Mayotte,Mamoudzou,-12.48,45.14,
+11,Morocco,Rabat,33.97159,-6.849813,http://world.einnews.com/rss/8Dg03Rex_c6h7R8H
+13,Mozambique,Maputo,-25.58,32.32,http://world.einnews.com/rss/_2WAhrrvakt_gIA7
+42,Namibia,Windhoek,-22.35,17.04,http://world.einnews.com/rss/Ef8QqNaK9JMuzJlu
+18,Niger,Niamey,13.27,2.06,http://world.einnews.com/rss/GfMESkdkcrDVrjwa
+1,Nigeria,Abuja,9.05,7.32,http://world.einnews.com/rss/PZbAq7eOPf76_tAm
+38,Republic of the Congo,Brazzaville,-4.09,15.12,http://world.einnews.com/rss/DgfP2t4cixmPFeci
+51,Reunion (France), Saint-Denis,-20.89066,55.455054,http://world.einnews.com/rss/zEKilAPDqscx0AVn
+28,Rwanda,Kigali,-1.59,30.04,http://world.einnews.com/rss/R3roSjGxycFc45qv
+58,"Saint Helena, Ascension and Tristan da Cunha (UK)",Jamestown,-15.928634,-5.715175,
+56,Sao Tome and Principe,Sao Tome,0.1,6.39,http://world.einnews.com/rss/2fbUupMRpixqSchc
+23,Senegal,Dakar,14.34,-17.29,http://world.einnews.com/rss/5hfdgmJwvBPVu3lg
+57,Seychelles,Victoria,-4.619143,55.451315,http://world.einnews.com/rss/hMrjFy2wuHpVsRm-
+35,Sierra Leone,Freetown,8.3,-13.17,http://world.einnews.com/rss/ZZUrqxlB3Vi3ONdy
+31,Somalia,Mogadishu,2.02,45.25,http://world.einnews.com/rss/XDRq4HNmNyUQjO8x
+5,South Africa,Pretoria,-25.44,28.12,http://world.einnews.com/rss/icevwSScytDc_20n
+29,South Sudan,Juba,4.859363,31.57125,http://world.einnews.com/rss/oIwzBwrZUyGb_7rR
+10,Sudan,Khartoum,15.31,32.35,http://world.einnews.com/rss/677gC3_w9Ay59oxe
+49,Swaziland,Mbabane ,-26.18,31.06,http://world.einnews.com/rss/kfUgW2wX4JlC6l5R
+6,Tanzania,Dodoma,-6.162959,35.751607,http://world.einnews.com/rss/qO6_SqP_lKBXQA6y
+33,Togo,Lome,6.09,1.2,http://world.einnews.com/rss/VGVUTCqeemqP0xGk
+27,Tunisia,Tunis,36.5,10.11,
+9,Uganda,Kampala,0.2,32.3,http://world.einnews.com/rss/YHd-w4EVHkKafQKo
+53,Western Sahara,El-Aaiún,25.3496917,-16.2541693,http://world.einnews.com/rss/jAN8X4lKtkpH6JMx
+22,Zambia,Lusaka,-15.28,28.16,http://world.einnews.com/rss/JG4VnstNRX-TiHQJ
+24,Zimbabwe,Harare,-17.43,31.02,http://world.einnews.com/rss/ldQlT4oPjytSHeJw

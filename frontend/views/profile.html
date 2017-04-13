@@ -9,11 +9,12 @@
    <meta name="googlebot" content="noindex, nofollow">
    <script type="text/javascript" src="//code.jquery.com/jquery-1.11.0.js"></script>
    <link rel="stylesheet" type="text/css" href="/css/result-light.css">
+   <script src="https://d3js.org/d3.v4.min.js"></script>
 
    <script>
     $(document).ready(function() {
         var myItems;
-	alert('readyFire');
+	console.log('readyFire');
         $.getJSON('../public/profile.json', function(data) {
         $.each(data.items, function(key, val) {
             alert(val.inputEmail3);
@@ -82,12 +83,13 @@
         <button type="submit" class="btn btn-danger">SOS</button>
       </form>
       <ul class="nav navbar-nav navbar-right">
-        <li><a href="#">Translate</a></li>
-        <li><a href="#">Connect</a></li>
+        <!--<li><a href="#">Translate</a></li>-->
+        <!--<li><a href="#">Connect</a></li>-->
         <li><a href="#">Profile <span class="sr-only">(current)</span></a></li>
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Countries <span class="caret"></span></a>
-          <ul class="dropdown-menu">
+          <ul id = "country_dd" class="dropdown-menu">
+           <li><a href="#"></li>
           </ul>
         </li>
       </ul>
@@ -96,49 +98,85 @@
 </nav>
 
 <br/>
+
+<script language="javascript">
+      d3.csv('countries.csv', function(error, dataset) {  // NEW
+          d3.select("#country_dd")
+            .selectAll("li")
+            .data(dataset)
+            .enter()
+            .append("li")
+              .html(function(d) { return "<a href='/?lat=" + d.Lat + "&lng=" + d.Long +"&feedurl="+ d.NewsFeed + "'>" +d.Country + "</a>" });
+       });
+
+       //Get the data from the database and populate.
+	$.ajax({url: "/api/profile/"+1, success: function(result){
+                var email = document.getElementById('email');
+                var phone = document.getElementById('phone');
+                var contact_name = document.getElementById('contact_name');
+                var contact_email = document.getElementById('contact_email');
+                var contact_phone = document.getElementById('contact_phone');
+                profile_response = result;
+                //Display the tweets
+                for (x = 0; x<profile_response.data.length; x++){
+                    email_text = profile_response.data[0]['email'];
+                    phone_text = profile_response.data[0]['phone'];
+                    contact_name_text = profile_response.data[0]['contact_name'];
+                    contact_email_text = profile_response.data[0]['contact_email'];
+                    contact_phone_text = profile_response.data[0]['contact_phone'];
+                    email.value = email_text;
+		    phone.value = phone_text;
+		    contact_name.value = contact_name_text;
+		    contact_email.value = contact_email_text;
+		    contact_phone.value = contact_phone_text;
+		    console.log(phone_text);
+                }
+                }});
+
+</script>
 <div class="jumbotron">
-<form name="profile_info" action="/receive_profile" method="post">
+<form name="profile_info" action="/api/profile" method="post">
     <div class="form-group row">
-      <label for="inputEmail3" class="col-sm-2 col-form-label">Email</label>
+      <label for="email" class="col-sm-2 col-form-label">Email</label>
       <div class="col-sm-4">
-        <input type="email" class="form-control" id="inputEmail3" placeholder="Email">
+        <input type="email" class="form-control" id="email" placeholder="Email" name="email">
       </div>
     </div>
     <div class="form-group row">
-      <label for="inputPassword3" class="col-sm-2 col-form-label">Password</label>
+      <label for="password" class="col-sm-2 col-form-label">Password</label>
       <div class="col-sm-4">
-        <input type="password" class="form-control" id="inputPassword3" name="inputPassword3" placeholder="Password">
+        <input type="password" class="form-control" id="password" name="password" placeholder="Password">
       </div>
     </div>
     <div class="form-group row">
-      <label for="inputPhone" class="col-sm-2 col-form-label">Phone</label>
+      <label for="phone" class="col-sm-2 col-form-label">Phone</label>
       <div class="col-sm-4">
-        <input type="phone" class="form-control" id="inputPhone" name="inputPhone" placeholder="Phone">
+        <input type="phone" class="form-control" id="phone" name="phone" placeholder="Phone">
       </div>
     </div>
     <div class="form-group row">
-      <label for="inputEmergencyPhone" class="col-sm-2 col-form-label">Emergency Contact</label>
+      <label for="contact_name" class="col-sm-2 col-form-label">Emergency Contact</label>
       <div class="col-sm-4">
-        <input type="text" class="form-control" id="inputEmergencyConctact" name="inputEmergencyContct" placeholder="Emergency Contact">
+        <input type="text" class="form-control" id="contact_name" name="contact_name" placeholder="Emergency Contact">
       </div>
     </div>
     <div class="form-group row">
-      <label for="inputEmergencyPhone" class="col-sm-2 col-form-label">Emergency Phone</label>
+      <label for="contact_phone" class="col-sm-2 col-form-label">Emergency Phone</label>
       <div class="col-sm-4">
-        <input type="phone" class="form-control" id="emergencyInputPhone" name="emergencyInputPhone"  placeholder="Emergency Phone">
+        <input type="phone" class="form-control" id="contact_phone" name="contact_phone"  placeholder="Emergency Phone">
       </div>
     </div>
     <div class="form-group row">
-      <label for="inputEmergencyEmail" class="col-sm-2 col-form-label">Emergency Email</label>
+      <label for="contact_email" class="col-sm-2 col-form-label">Emergency Email</label>
       <div class="col-sm-4">
-        <input type="phone" class="form-control" id="emergencyInputEmail" name="emergencyInputEmail"  placeholder="Emergency Email">
+        <input type="email" class="form-control" id="contact_email" name="contact_email"  placeholder="Emergency Email">
       </div>
     </div>
 
 
     <div class="form-group row">
       <div class="offset-sm-2 col-sm-10">
-        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="submit"  class="btn btn-primary">Save</button>
       </div>
     </div>
   </form>
