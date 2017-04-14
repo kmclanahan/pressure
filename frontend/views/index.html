@@ -33,7 +33,7 @@
    /* Always set the map height explicitly to define the size of the div
     * element that contains the map. */
    #map {
-        height: 75%;
+        height: 65%;
         width: 100%;
         margin-left: auto;
         margin-right: auto;
@@ -154,11 +154,32 @@
 	}
 
     }
+    .logoimage {
+      height: 80px;
+      width: auto;
+      margin-top: 0;
+      padding-top: 0px;
+      margin-left: 10px;
+      margin-right: 10px;
+      display: block;
+      margin-bottom: 20px;
+    }
+
+    .callbuttons {
+      display: inline-block;
+      color: white;
+      margin-left: 2px;
+    }
+    .callbuttons:hover {
+      display: inline-block;
+      color: white;
+      margin-left: 2px;
+    }
    </style>
 </head>
 <body>
 <nav class="navbar navbar-inverse">
-  <div class="container-fluid">
+  <div class="container-fluid" style="background-color: black">
     <!-- Brand and toggle get grouped for better mobile display -->
     <div class="navbar-header">
       <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
@@ -167,19 +188,22 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="#">PRESSURE</a>
+     <!---<a class="navbar-brand" href="#">PRESSURE</a>--->
+      <a href="#" class="navbar-brand logoimage"><img src="logo50"  height="100px" width="50px" alt:'logo'></a>
+      <form class="navbar-form navbar-left">
+        <button type="button"  class="btn btn-danger" onClick="sendDetails();">SOS</button>
+        <a href="#" id = "contact_btn" role="button"  class="btn btn-success">I'm OK</a>
+	<section class="hidden-md-up"><br></section>
+        <a href="#" class = "button callbuttons" id = "embassy_btn">&nbsp; Embassy <i class="glyphicon glyphicon-earphone pull-left"></i></a>
+      </form>
+
     </div>
 
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-      <ul class="nav navbar-nav">
+      <!---<ul class="nav navbar-nav">
         <li class="active"><a href="#">Home <span class="sr-only">(current)</span></a></li>
-      </ul>
-      <form class="navbar-form navbar-left">
-        <button type="button"  class="btn btn-danger" onClick="sendDetails();">SOS</button>
-        <button type="button"  class="btn btn-primary" onClick="sendDetails();">EMBASSY</button>
-        <button type="button"  class="btn btn-success" onClick="sendDetails();">CONTACT</button>
-      </form>
+      </ul>--->
       <ul class="nav navbar-nav navbar-right">
         <!---<li><a href="#">Translate</a></li>--->
         <!---<li><a href="#">Connect</a></li>--->
@@ -203,7 +227,7 @@
 	<span id="contact_name"></span>
 	<span id="contact_email"></span>
 	<span id="contact_phone"></span> <br>
-	<button type="button" class="btn-success" onClick="stopSOS();">STOP</button>
+	<button type="button" class="btn-success" onClick="stopSOS();">I'm OK</button>
 	</center>
 </div>
 
@@ -304,13 +328,13 @@
 	return( arrData );
       } 
 	
-
+      //Create map
       var map;
       var country_news = [];
       var im = 'http://www.robotwoods.com/dev/misc/bluecircle.png';
       var embassy_icon = 'http://icons.iconarchive.com/icons/icons8/ios7/16/City-Embassy-icon.png';
 
-
+      //Load country dropdown
       d3.csv('countries.csv', function(error, dataset) {  // NEW
 	  d3.select("#country_dd")
     	    .selectAll("li")
@@ -319,6 +343,18 @@
             .append("li")
                  .html(function(d) { return "<a href='/?lat=" + d.Lat + "&lng=" + d.Long +"&feedurl="+ d.NewsFeed + "'>" +d.Country + "</a>" });
        });
+
+	//Set the contact phone number
+        $.ajax({url: "/api/profile/"+1, success: function(result){
+                profile_response = result;
+		console.log("PHONE:" + profile_response);
+                //Display the tweets
+                for (x = 0; x<profile_response.data.length; x++){
+                    contact_phone_text = profile_response.data[0]['contact_phone'];
+	            $("#contact_btn").attr("href", "tel:" + contact_phone_text);
+                }
+                }});
+
 
 	//Turn on the SOS and send the information to the emergency contacts
 	function sendDetails(){
@@ -400,6 +436,11 @@
 		console.log(country_news[x]);
 		elementId = 'news_' + x;
 		response = country_news[x];
+		if (response === 'No current regional news.'){
+		//No News
+        	   document.getElementById(elementId).innerHTML +=  country_news[x];
+		}
+	        else{
       		for (var i = 0; i < response.items.length; i++) {
 		    //console.log(item);
         	    var item = response.items[i];
@@ -407,6 +448,7 @@
 		   linkToSite = "<a target='new_' href='" + item.link + "'>" + item.htmlTitle + "</a>";
         	   document.getElementById(elementId).innerHTML +=  linkToSite + "<br>";
       		}
+		}
 	 	document.getElementById(elementId).style.display = 'block';
 	}
 	
@@ -439,12 +481,18 @@
 
      //Organize and display the news items returned from google news
      function hndlr(response, div_id) {
-      for (var i = 0; i < response.items.length; i++) {
-        var item = response.items[i];
-        // in production code, item.htmlTitle should have the HTML entities escaped.
-	console.log(div_id + " " + item);
-	country_news[div_id] = response;
-        //document.getElementById("news_"+div_id).innerHTML += "<br>" + item.htmlTitle;
+      if (typeof response.items != 'undefined'){
+        for (var i = 0; i < response.items.length; i++) {
+          var item = response.items[i];
+          // in production code, item.htmlTitle should have the HTML entities escaped.
+	  console.log(div_id + " " + item);
+	  country_news[div_id] = response;
+          //document.getElementById("news_"+div_id).innerHTML += "<br>" + item.htmlTitle;
+        }
+      }
+      else{
+        //No news
+	country_news[div_id] = "No current regional news.";
       }
     }
 
@@ -557,7 +605,9 @@
 			     "<span style='font-weight: normal'>" + top_words + "</span>" +  
 	    		    "</div>";
             document.getElementById('alerts').innerHTML+= spike_content;
-
+	    if (document.getElementById('alerts').offsetHeight < document.getElementById('alerts').scrollHeight){
+		document.getElementById('alert_s').innerHTML += "<center><br><i>Scroll for more alerts.</i><br></center>";
+	 	}
 	    //Set onClick event
 	    document.getElementById("alert_"+x).addEventListener("click", function(){ map.setCenter(spikeLL);});
 	    
@@ -576,7 +626,7 @@
 	    	     "<div style='height: 70px; display: none; overflow: hidden; overflow-y: scroll;' id='news_" + x + "'></div>" +
 		     "<br>" +  
 		     "<a href='javascript:void(0);' onClick='showTweets(" + spike_response.data[x]['idx'] + "," +  x+ ")'>Show Tweets</a>" + 
-	    	     "<div style='height: 70px; display: none; overflow: hidden; overflow-y: scroll;' id='tweets_" + x + "'></div>" + "</br>" + 
+	    	     "<div style='height: 70px; display: none; overflow: hidden; overflow-y: scroll;' id='tweets_" + x + "'></div>" + "</br></br>" + 
 		     "<button type='button' class='btn-success'>Relevant</button>"
 		    
 		});
@@ -672,7 +722,8 @@
 		var marker = new google.maps.Marker({
 			position: eLL,
 			map: map,
-			icon: embassy_icon,
+			icon: {url: embassy_icon,
+			       scaledSize: new google.maps.Size(20, 20)},
 			title:data[i][1],
                         html: emb_content
 		});
@@ -713,6 +764,7 @@
    		}
 	}
 	closestEmb = 100000;
+	closestEmbPhone = "";
 	for (var i = 0; i < data.length; i++) 
 	{
 		// Create a lat/long object readable by Google
@@ -733,10 +785,17 @@
 		  travelMode  : google.maps.DirectionsTravelMode.DRIVING
 		};
                 embDist = (google.maps.geometry.spherical.computeDistanceBetween(curLatLng, embLatLng) / 1000).toFixed(0);
-		if (embDist < closestEmb){
+		console.log(data[i][1]+ embDist);
+		if (parseInt(embDist) < parseInt(closestEmb) && embDist != 'NA'){
 			closestEmb = embDist;
+			closestEmbPhone = data[i][5];
+			closestEmbName = data[i][1];
+			closestEmbCity = data[i][4];
 		}
-		console.log(closestEmb);
+		console.log("CLOSEST: " + closestEmbName);
+
+		$("#embassy_btn").attr("href", "tel:" + closestEmbPhone);
+		document.getElementById('embassy_btn').innerHTML =  "&nbsp;Embassy "+ closestEmbCity + ", " +  closestEmbName.split(",")[1]+" <i class='glyphicon glyphicon-earphone pull-left'></i>"; 
 		var distance = getDistance (request, myLatLng, embLatLng, data, i, mll_lat, mll_lng, ell_lat, ell_lng );
 	}	
        //END IMPORT EMBASSY DATA
