@@ -1,0 +1,819 @@
+<!doctype html>
+<html lang="en">
+<head>
+   <title>Pressure -- Real-Time Crisis Navigator</title>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1">
+   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+   <meta name="robots" content="noindex, nofollow">
+   <meta name="googlebot" content="noindex, nofollow">
+   <script type="text/javascript" src="//code.jquery.com/jquery-1.11.0.js"></script>
+   <script src="https://d3js.org/d3.v4.min.js"></script>
+   <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.3/angular.min.js"></script>
+   <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.3/angular-route.min.js"></script>
+   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+   <script type="text/javascript" src="http://mbostock.github.com/d3/d3.csv.js"></script>
+   <script type="text/javascript" src="http://mbostock.github.com/d3/d3.time.js"></script>
+   <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+   <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.9.0/math.min.js"></script>
+   <link rel="stylesheet" type="text/css" href="/css/result-light.css">
+   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+   <script src="http://maps.googleapis.com/maps/api/js?libraries=geometry&sensor=false"></script>
+   <style type="text/css">
+   .loading {
+     margin-top: 10em;
+     text-align: center;
+     color: gray;
+   }
+
+   body {
+     background: #eee;
+   }
+   /* Always set the map height explicitly to define the size of the div
+    * element that contains the map. */
+   #map {
+        height: 65%;
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+   #feed {
+        height: 20%;
+        width: 80%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content/Box */
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+}
+
+/* The Close Button */
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+   #alerts{
+     background-color: black;
+     height: 15%;
+      width: 100%;
+      overflow-y: scroll;
+      scrollbar-base-color: #000;
+      margin: 0  auto;
+   }
+
+.circle {
+       width: 15px;
+       height: 15px;
+       border-radius: 50%;
+       font-size: 5px;
+       color: #fff;
+       line-height: 10px;
+       text-align: center;
+       background: #fff
+     }
+
+ .outer-circle {
+   background: #385a94;
+   border-radius: 50%;
+   height: 15px;
+   width: 15px;
+   position: relative;
+   /* 
+    Child elements with absolute positioning will be 
+    positioned relative to this div 
+   */
+ }
+ .inner-circle {
+   position: absolute;
+   background: #000;
+   border-radius: 50%;
+   height: 5px;
+   width: 5px;
+   /*
+    Put top edge and left edge in the center
+   */
+   top: 50%;
+   left: 50%;
+   margin: -3px 0px 0px -3px;
+   /* 
+    Offset the position correctly with
+    minus half of the width and minus half of the height 
+   */
+ }
+
+    /* Optional: Makes the sample page fill the window. */
+    html, body {
+      height: 100%;
+
+
+	.stations, .stations svg {
+	  position: absolute;
+	}
+	.stations svg {
+	  width: 60px;
+	  height: 20px;
+	  padding-right: 100px;
+	  font: 10px sans-serif;
+	}
+	.stations circle {
+	  fill: brown;
+	  stroke: black;
+	  stroke-width: 1.5px;
+	}
+
+    }
+    .logoimage {
+      height: 80px;
+      width: auto;
+      margin-top: 0;
+      padding-top: 0px;
+      margin-left: 10px;
+      margin-right: 10px;
+      display: block;
+      margin-bottom: 20px;
+    }
+
+    .callbuttons {
+      display: inline-block;
+      color: white;
+      margin-left: 2px;
+    }
+    .callbuttons:hover {
+      display: inline-block;
+      color: white;
+      margin-left: 2px;
+    }
+   </style>
+</head>
+<body>
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid" style="background-color: black">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+     <!---<a class="navbar-brand" href="#">PRESSURE</a>--->
+      <a href="#" class="navbar-brand logoimage"><img src="logo50"  height="100px" width="50px" alt:'logo'></a>
+      <form class="navbar-form navbar-left">
+        <button type="button"  class="btn btn-danger" onClick="sendDetails();">SOS</button>
+        <a href="#" id = "contact_btn" role="button"  class="btn btn-success">I'm OK</a>
+	<section class="hidden-md-up"><br></section>
+        <a href="#" class = "button callbuttons" id = "embassy_btn">&nbsp; Embassy <i class="glyphicon glyphicon-earphone pull-left"></i></a>
+      </form>
+
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <!---<ul class="nav navbar-nav">
+        <li class="active"><a href="#">Home <span class="sr-only">(current)</span></a></li>
+      </ul>--->
+      <ul class="nav navbar-nav navbar-right">
+        <!---<li><a href="#">Translate</a></li>--->
+        <!---<li><a href="#">Connect</a></li>--->
+        <li><a href="/profile">Profile</a></li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Countries <span class="caret"></span></a>
+          <ul id = "country_dd" class="dropdown-menu">
+           <li><a href="#"></a></li>
+          </ul>
+        </li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+
+<div width="100%" style="background-color: #d9534f; display: none; width: 100%; margin: 0 auto; font-weight: bold; padding: 10px" id = "sos_details" >
+	<center>
+	SOS ENGAGED:  SENDING POSITION INFO TO --
+	<span id="email"></span>
+	<span id="phone"></span>
+	<span id="contact_name"></span>
+	<span id="contact_email"></span>
+	<span id="contact_phone"></span> <br>
+	<button type="button" class="btn-success" onClick="stopSOS();">I'm OK</button>
+	</center>
+</div>
+
+
+<div style = "height:100%; padding: 0px; margin: 0px;" class="jumbotron">
+    <div id="map"></div>
+    <script>
+
+
+     // $(function () {
+     feedUrl = "NotSet";
+
+     // Read a page's GET URL variables and return them as an associative array.
+     function getUrlVars()
+     {
+       var vars = [], hash;
+       var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+       for(var i = 0; i < hashes.length; i++)
+       {
+           hash = hashes[i].split('=');
+           vars.push(hash[0]);
+           vars[hash[0]] = hash[1];
+        }
+        return vars;
+      }
+      // Get data out of a CSV file to load into the page.
+      // This will parse a delimited string into an array of
+      // arrays. The default delimiter is the comma, but this
+      // can be overriden in the second argument.
+      function CSVToArray( strData, strDelimiter ){
+	// Check to see if the delimiter is defined. If not,
+	// then default to comma.
+	strDelimiter = (strDelimiter || ",");
+ 
+	// Create a regular expression to parse the CSV values.
+	var objPattern = new RegExp(
+		(
+			// Delimiters.
+			"(\\" + strDelimiter + "|\\r?\\n|\\r|^)" +
+ 
+			// Quoted fields.
+			"(?:\"([^\"]*(?:\"\"[^\"]*)*)\"|" +
+ 
+			// Standard fields.
+			"([^\"\\" + strDelimiter + "\\r\\n]*))"
+		), "gi");
+ 
+	// Create an array to hold our data. Give the array
+	// a default empty first row.
+	var arrData = [[]];
+ 
+	// Create an array to hold our individual pattern
+	// matching groups.
+	var arrMatches = null;
+ 
+	// Keep looping over the regular expression matches
+	// until we can no longer find a match.
+	while (arrMatches = objPattern.exec( strData ))
+	{
+		// Get the delimiter that was found.
+		var strMatchedDelimiter = arrMatches[ 1 ];
+ 
+		// Check to see if the given delimiter has a length
+		// (is not the start of string) and if it matches
+		// field delimiter. If id does not, then we know
+		// that this delimiter is a row delimiter.
+		if (strMatchedDelimiter.length && (strMatchedDelimiter != strDelimiter))
+		{
+			// Since we have reached a new row of data,
+			// add an empty row to our data array.
+			arrData.push( [] );
+ 
+		}
+ 
+		// Now that we have our delimiter out of the way,
+		// let's check to see which kind of value we
+		// captured (quoted or unquoted).
+		if (arrMatches[ 2 ]){
+			// We found a quoted value. When we capture
+			// this value, unescape any double quotes.
+			var strMatchedValue = arrMatches[ 2 ].replace(
+				new RegExp( "\"\"", "g" ),
+				"\""
+				);
+ 
+		} else 
+		{
+			// We found a non-quoted value.
+			var strMatchedValue = arrMatches[ 3 ];
+		}
+ 
+		// Now that we have our value string, let's add
+		// it to the data array.
+		arrData[ arrData.length - 1 ].push( strMatchedValue );
+	}
+ 
+	// Return the parsed data.
+	return( arrData );
+      } 
+	
+      //Create map
+      var map;
+      var country_news = [];
+      var im = 'http://www.robotwoods.com/dev/misc/bluecircle.png';
+      var embassy_icon = 'http://icons.iconarchive.com/icons/icons8/ios7/16/City-Embassy-icon.png';
+
+      //Load country dropdown
+      d3.csv('countries.csv', function(error, dataset) {  // NEW
+	  d3.select("#country_dd")
+    	    .selectAll("li")
+      	    .data(dataset)
+    	    .enter()
+            .append("li")
+                 .html(function(d) { return "<a href='/?lat=" + d.Lat + "&lng=" + d.Long +"&feedurl="+ d.NewsFeed + "'>" +d.Country + "</a>" });
+       });
+
+	//Set the contact phone number
+        $.ajax({url: "/api/profile/"+1, success: function(result){
+                profile_response = result;
+		console.log("PHONE:" + profile_response);
+                //Display the tweets
+                for (x = 0; x<profile_response.data.length; x++){
+                    contact_phone_text = profile_response.data[0]['contact_phone'];
+	            $("#contact_btn").attr("href", "tel:" + contact_phone_text);
+                }
+                }});
+
+
+	//Turn on the SOS and send the information to the emergency contacts
+	function sendDetails(){
+		console.log('SOS');
+        //Get the data from the database and populate.
+        $.ajax({url: "/api/profile/"+1, success: function(result){
+                var email = document.getElementById('email');
+                var phone = document.getElementById('phone');
+                var contact_name = document.getElementById('contact_name');
+                var contact_email = document.getElementById('contact_email');
+                var contact_phone = document.getElementById('contact_phone');
+                profile_response = result;
+                //Display the tweets
+                for (x = 0; x<profile_response.data.length; x++){
+                    email_text = profile_response.data[0]['email'];
+                    phone_text = profile_response.data[0]['phone'];
+                    contact_name_text = profile_response.data[0]['contact_name'];
+                    contact_email_text = profile_response.data[0]['contact_email'];
+                    contact_phone_text = profile_response.data[0]['contact_phone'];
+                    email.value = email_text;
+                    phone.value = phone_text;
+                    contact_name.innerHTML = contact_name_text;
+                    contact_email.innerHTML = contact_email_text;
+                    contact_phone.innerHTML = contact_phone_text;
+                }
+                }});
+
+	 	document.getElementById("sos_details").style.display= 'block';
+	}
+
+	//Turn off the SOS mailings.
+	function stopSOS(){
+		console.log('STOP SOS');
+	 	document.getElementById("sos_details").style.display= 'none';	
+	}
+
+	//Draw the driving directions on the map
+	function drawDirections(mll_lat, mll_lng, ell_lat, ell_lng) {
+		var embLatLng = new google.maps.LatLng(ell_lat, ell_lng);
+		var myLatLng = new google.maps.LatLng(mll_lat, mll_lng);
+		//console.log(embLatLng);
+		//console.log(myLatLng);
+		var request = {
+		  origin      : myLatLng, // a city, full address, landmark etc
+		  destination : embLatLng,
+		  travelMode  : google.maps.DirectionsTravelMode.DRIVING
+		};
+		var directionsService = new google.maps.DirectionsService();
+
+		directionsService.route(request, function(response, status) {
+		  if ( status == google.maps.DirectionsStatus.OK ) {
+			//console.log(response);
+	                directionsDisplay = new google.maps.DirectionsRenderer();
+        	        directionsDisplay.setMap(map);
+                	directionsDisplay.setDirections(response);
+		  }
+		});
+	}
+
+      //Show the tweets in the tweet spike popup
+      function showTweets(spikeId, x){
+      	  $.ajax({url: "/api/tweets/"+spikeId, success: function(result){
+		var tweetDiv = document.getElementById('tweets_'+x);
+        	tweet_response = result;
+        	//Display the tweets
+		all_tweets = "";
+		for (x = 0; x<tweet_response.data.length; x++){
+	 	    tweet_text = tweet_response.data[x]['tweet'];
+		    console.log(tweet_text);
+		    all_tweets += tweet_text + "<br>";
+		}
+		tweetDiv.innerHTML = all_tweets;
+                tweetDiv.style.display = "block";
+      	  	}});
+	}
+	
+	//Show news function takes data from the handlr function, formats and displays it
+	function showNews(x){
+		console.log(country_news[x]);
+		elementId = 'news_' + x;
+		response = country_news[x];
+		if (response === 'No current regional news.'){
+		//No News
+        	   document.getElementById(elementId).innerHTML +=  country_news[x];
+		}
+	        else{
+      		for (var i = 0; i < response.items.length; i++) {
+		    //console.log(item);
+        	    var item = response.items[i];
+	           // in production code, item.htmlTitle should have the HTML entities escaped.
+		   linkToSite = "<a target='new_' href='" + item.link + "'>" + item.htmlTitle + "</a>";
+        	   document.getElementById(elementId).innerHTML +=  linkToSite + "<br>";
+      		}
+		}
+	 	document.getElementById(elementId).style.display = 'block';
+	}
+	
+	//Get the country of the spike and also get the news for that country based on spike related lat/lng
+	function getCountry(x, spikeLL){
+	    var geocoder = new google.maps.Geocoder;
+            geocoder.geocode({'location': spikeLL}, function(c_results, c_status) {
+                 if(c_status === 'OK'){
+		spikeLocation = c_results[1].formatted_address;
+		document.getElementById('spikeLoc_'+ x).innerHTML = spikeLocation;
+
+    		//request news
+    		$(function(){
+		 console.log("X" + x);
+		 var div_id = x;
+        	  $.ajax({
+			//cx=017576662512468239146:omuauf_lfve
+        		url:'https://www.googleapis.com/customsearch/v1?key=AIzaSyBcc2O3mvsB8EmDbFeXmSda_vzRLrDz7IY&cx=004125819262731474818:4z9moaefaps&q=' +spikeLocation + '&sort=date-sdate',
+        		type:"GET",
+        		async:'true',
+        		success:function (data) {
+                        hndlr(data, div_id);
+          	  }
+        	  });
+      		});
+
+		}
+	    });
+      }
+
+     //Organize and display the news items returned from google news
+     function hndlr(response, div_id) {
+      if (typeof response.items != 'undefined'){
+        for (var i = 0; i < response.items.length; i++) {
+          var item = response.items[i];
+          // in production code, item.htmlTitle should have the HTML entities escaped.
+	  console.log(div_id + " " + item);
+	  country_news[div_id] = response;
+          //document.getElementById("news_"+div_id).innerHTML += "<br>" + item.htmlTitle;
+        }
+      }
+      else{
+        //No news
+	country_news[div_id] = "No current regional news.";
+      }
+    }
+
+
+      function locate(){
+        navigator.geolocation.getCurrentPosition(initialize,fail);
+      }
+
+      //Initialize the Google map and set the center and zoom levels
+      function initMap() {
+       var embassyLatLng = {lat: -13.962460, lng: 33.785780};
+       var myLatLng = {lat: -13.0, lng: 33.0};
+       
+       urlVars = getUrlVars();
+       var latitude  = urlVars["lat"];
+       var longitude  = urlVars["lng"];
+       var mapZoom = 8;
+       var mapType = "mapTypeId: google.maps.MapTypeId.TERRAIN";
+       
+
+       //Set to center of continent if lat/long not set, set zoom to show entire continent
+       if (typeof(latitude) == "undefined"){
+          var myLatLng = {lat: 2, lng: 21.5085};
+	  latitude = 2;
+	  longitude = 21.5085;   
+          var mapZoom = 4; 
+       }
+       else{
+           var myLatLng = {lat: Number(latitude), lng: Number(longitude)};
+       }
+
+      // Create the Google Map…
+      map = new google.maps.Map(d3.select("#map").node(), {
+  	 zoom: mapZoom,
+         center: myLatLng,
+         mapTypeId: google.maps.MapTypeId.TERRAIN
+      });
+
+      //Get spike data from the postgres database
+      var spike_response;
+      var safteyAlert = true;
+      var alert_colors = ["red", "orange", "yellow", "maroon", "purple"];
+      $.ajax({url: "/api/spikes", success: function(result){
+        spike_response = result;
+        //console.log (spike_response);
+        //Check Distances
+	for (x = 0; x<spike_response.data.length; x++){
+	    //alert(x + "spike respons lat: " + spike_response.data[x]['latitude']);
+	    spike_lat =  spike_response.data[x]['latitude'];
+	    //alert(x + "spike respons lng: " + spike_response.data[x]['longitude']);
+	    spike_lng =  spike_response.data[x]['longitude'];
+	    spikeLL = new google.maps.LatLng(spike_lat, spike_lng);
+	    currentLL = new google.maps.LatLng(myLatLng.lat, myLatLng.lng);
+	    //console.log(myLatLng);
+            //console.log(spikeLL);
+	    spikeDistance = (google.maps.geometry.spherical.computeDistanceBetween(spikeLL, currentLL) / 1000).toFixed(2);
+	    if (spikeDistance < 500){
+	   	safteyAlert = false;
+	    }
+	}
+
+	if(safteyAlert){
+	if (spike_response.data.length == 0 ){
+	spike_content = "<div id='alert_s'" +
+                        " style='color: green; font-weight: bold; padding: 5px'>"+
+   			"<div class='circle' style='float: left; background-color:green'> </div> " + 
+			" Saftey Alert: " +  "<span style='font-weight:normal; color: #ccc'>" + 
+		        "Currently no activity." + 
+			"</span>" + 
+	    	        "</div>" + 
+			"<hr style='margin: 0px;}'>";
+	}
+	else{
+	spike_content = "<div id='alert_s'" + 
+                        " style='color: #ccc; font-weight: bold; padding: 5px'>" +
+   			"&nbsp;&nbsp;<div class='circle' style='float: left; background-color:green'> </div> " + 
+			" Saftey Alert: " +  "<span style='font-weight:normal;'>" + 
+		        "No activity spikes withing 500 km of your current position." + 
+			"</span>" + 
+	    	        "</div>" + 
+			"<hr style='margin: 0px;}'>";
+        }
+            document.getElementById('alerts').innerHTML+= spike_content;
+	}
+
+        for (x = 0; x<spike_response.data.length; x++){
+	    //alert(x + "spike respons lat: " + spike_response.data[x]['latitude']);
+	    spike_lat =  spike_response.data[x]['latitude'];
+	    //alert(x + "spike respons lng: " + spike_response.data[x]['longitude']);
+	    spike_lng =  spike_response.data[x]['longitude'];
+	    spikeLL = new google.maps.LatLng(spike_lat, spike_lng);
+	    currentLL = new google.maps.LatLng(myLatLng.lat, myLatLng.lng);
+	    //console.log(myLatLng);
+            //console.log(spikeLL);
+	    var curSpike = x;
+            spikeDistance = (google.maps.geometry.spherical.computeDistanceBetween(spikeLL, currentLL) / 1000).toFixed(0);
+	    spikeLocation = "";
+    	    getCountry(x, spikeLL);
+	    //process top words
+            top_words = spike_response.data[x]['top_words']; 
+
+	    //Create the alert text
+	    spike_content = "<div  id='alert_" + x + "'" + 
+                             " style='color: #ccc; font-weight: bold; overflow:hidden; padding: 5px;'>" + 
+    			     "<div class='outer-circle' style='float: left; background-color:" + alert_colors[x] + "'><div class='inner-circle'></div> </div> " + 
+			     "&nbsp;&nbsp;&nbsp;Activity Spike: " +
+			     "<span id='spikeLoc_" + x + "' style='font-weight: normal'>" + spikeLocation + "</span> | " + 
+			     "<span style='font-weight: normal'>" + spikeDistance.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " km (from you)</span> | " + 
+             		     "<span style='font-weight: normal'>" + Math.round(spike_response.data[x]['spike_percent']) + "% (increase)</span> | Top Words: " + 			      
+			     "<span style='font-weight: normal'>" + top_words + "</span>" +  
+	    		    "</div>";
+            document.getElementById('alerts').innerHTML+= spike_content;
+	    if (document.getElementById('alerts').offsetHeight < document.getElementById('alerts').scrollHeight){
+		document.getElementById('alert_s').innerHTML += "<center><br><i>Scroll for more alerts.</i><br></center>";
+	 	}
+	    //Set onClick event
+	    document.getElementById("alert_"+x).addEventListener("click", function(){ map.setCenter(spikeLL);});
+	    
+	    //Place Spike on the Map
+	    var marker = new google.maps.Marker({
+		position: spikeLL,
+		map: map,
+		icon: {
+                   path: google.maps.SymbolPath.CIRCLE,
+                   scale: spike_response.data[x]['spike_percent']/75,
+		   strokeColor: alert_colors[x]
+                  },
+		title:"Spike Alert",
+                html: spike_content + 
+		     "<a href='javascript:void(0);' onClick=\"showNews(" + x + ")\" >Show News</a>" + "<br>" + 	
+	    	     "<div style='height: 70px; display: none; overflow: hidden; overflow-y: scroll;' id='news_" + x + "'></div>" +
+		     "<br>" +  
+		     "<a href='javascript:void(0);' onClick='showTweets(" + spike_response.data[x]['idx'] + "," +  x+ ")'>Show Tweets</a>" + 
+	    	     "<div style='height: 70px; display: none; overflow: hidden; overflow-y: scroll;' id='tweets_" + x + "'></div>" + "</br></br>" + 
+		     "<button type='button' class='btn-success'>Relevant</button>"
+		    
+		});
+                google.maps.event.addListener(marker, "click", function() {
+                   infowindow.setContent(this.html);
+                   infowindow.open(map, this);
+               });	    
+         }
+        
+      }});	
+
+
+
+/*
+       //BEGIN IMPORT TWEETS
+	var returnValue = "";
+	var request = new XMLHttpRequest();
+	// Read the lat/long info for markers
+	request.open("GET", "tweets_6000.csv", false);
+	request.send(null);
+	returnValue = request.responseText;
+ 
+	// Convert our data from the CVS file to a usable array
+	var data = CSVToArray(returnValue);
+	for (var i = 0; i < data.length; i++) 
+	{
+		// Create a lat/long object readable by Google
+		var myLatlng = new google.maps.LatLng(parseFloat(data[i][2]), parseFloat(data[i][3]));
+		// Generate a marker from the lat/long object and add it to the map
+		var marker = new google.maps.Marker({
+			position: myLatlng,
+			map: map,
+			title:data[i][1],
+    			icon: {
+        		  path: google.maps.SymbolPath.CIRCLE,
+        		  scale: 2.5,
+        		  fillColor: "#F00",
+        		  fillOpacity: 0.4,
+        		  strokeWeight: 0.4
+    			}
+		});
+	}	
+       //END IMPORT TWEET DATA
+*/
+
+       //BEGIN IMPORT EMBASSY DATA
+	var returnValue = "";
+	var request = new XMLHttpRequest();
+	// Read the lat/long info for markers
+	request.open("GET", "us_embassies.csv", false);
+	request.send(null);
+	returnValue = request.responseText;
+ 
+	// Convert our data from the CVS file to a usable array
+	var data = CSVToArray(returnValue);
+        infowindow = new google.maps.InfoWindow({
+               content: "loading....."
+        });
+
+	
+	 function getDistance(req, mLL, eLL, data, i, mll_lat, mll_lng, ell_lat, ell_lng){
+		var directionsService = new google.maps.DirectionsService();
+		directionsService.route(req, function(response, status) {
+		//console.log(mll_lat + " " + mll_lng+ " " + ell_lat + " " + ell_lng);
+		//console.log(response);
+
+		  if ( status == google.maps.DirectionsStatus.OK ) {
+
+		    var duration = response.routes[0].legs[0].duration.value; //the duration of the trip
+		    var distance = response.routes[0].legs[0].distance.value; // the distance in metre
+		    var time = duration;
+		    var hours = Math.floor(time / 3600);
+		    time = time - hours * 3600;
+		    var minutes = Math.floor(time / 60);
+                    //console.log(data[i][0] + " " + data[i][1] + " " + mLL + " " + distance);
+		// Generate a marker from the lat/long object and add it to the map
+                var emb_content = "<div>" + 
+                                  "<b><u>" + data[i][1]  +  "</u></b><br>" +
+ 				  "phone: <a href='tel:" + data[i][5] + "'>" + data[i][5] + "</a><br>" +
+				  "address: " + data[i][3] + "<br>" + 
+				   "distance: " + (distance/1000).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " km<br>" + 
+				   "duration: " + hours + " h " + minutes + " min<br>" +
+				   //Send the lat long of the dest and the orig to the funciton call for directions, write directions
+				   "directions: <a id='dir_" + i + "' href='javascript:void(0);' onClick='drawDirections("+mll_lat+","+ mll_lng +"," + ell_lat + "," + ell_lng+");'>Directions</a><br>" +  
+                                  "</div>";
+		//bind click event to link
+		//dirLink=document.getElementById( "dir_4" );
+                //alert(dirLink);
+		//dirLink.onclick=function(){
+                //     drawDirections(response);
+	        //     return false;
+		//};
+		var marker = new google.maps.Marker({
+			position: eLL,
+			map: map,
+			icon: {url: embassy_icon,
+			       scaledSize: new google.maps.Size(20, 20)},
+			title:data[i][1],
+                        html: emb_content
+		});
+                google.maps.event.addListener(marker, "click", function() {
+                   infowindow.setContent(this.html);
+                   infowindow.open(map, this);
+               });
+		  }
+		  else {
+		    //console.log(data[i][1]);
+		// Generate a marker from the lat/long object and add it to the map
+                var emb_content = "<div>" + 
+                                  "<b><u>" + data[i][1]  +  "</u></b><br>" +
+ 				  "phone: <a href='tel:" + data[i][5] + "'>" + data[i][5] + "</a><br>" +
+				  "address: " + data[i][3] + "<br>" + 
+                                  "</div>";
+		var marker = new google.maps.Marker({
+			position: eLL,
+			map: map,
+			icon: embassy_icon,
+			title:data[i][1],
+                        html: emb_content
+		});
+                google.maps.event.addListener(marker, "click", function() {
+                   infowindow.setContent(this.html);
+                   infowindow.open(map, this);
+               });
+		    // oops, there's no route between these two locations
+		    // so please, ensure your address is formatted properly
+		  }
+		});
+	}
+	
+	function sleep(miliseconds) {
+   	var currentTime = new Date().getTime();
+
+   	while (currentTime + miliseconds >= new Date().getTime()) {
+   		}
+	}
+	closestEmb = 100000;
+	closestEmbPhone = "";
+	for (var i = 0; i < data.length; i++) 
+	{
+		// Create a lat/long object readable by Google
+		ell_lat = parseFloat(data[i][9]);
+	        ell_lng = parseFloat(data[i][10]);
+		var mll_lat = latitude;
+		var mll_lng = longitude;
+		
+
+		var embLatLng = new google.maps.LatLng(parseFloat(data[i][9]), parseFloat(data[i][10]));
+		var curLatLng = new google.maps.LatLng(mll_lat, mll_lng);
+
+		// Calculate the driving time between the current position and this embassy
+                //console.log(data[i][1] + myLatLng);
+		var request = {
+		  origin      : myLatLng, // a city, full address, landmark etc
+		  destination : embLatLng,
+		  travelMode  : google.maps.DirectionsTravelMode.DRIVING
+		};
+                embDist = (google.maps.geometry.spherical.computeDistanceBetween(curLatLng, embLatLng) / 1000).toFixed(0);
+		console.log(data[i][1]+ embDist);
+		if (parseInt(embDist) < parseInt(closestEmb) && embDist != 'NA'){
+			closestEmb = embDist;
+			closestEmbPhone = data[i][5];
+			closestEmbName = data[i][1];
+			closestEmbCity = data[i][4];
+		}
+		console.log("CLOSEST: " + closestEmbName);
+
+		$("#embassy_btn").attr("href", "tel:" + closestEmbPhone);
+		document.getElementById('embassy_btn').innerHTML =  "&nbsp;Embassy "+ closestEmbCity + ", " +  closestEmbName.split(",")[1]+" <i class='glyphicon glyphicon-earphone pull-left'></i>"; 
+		var distance = getDistance (request, myLatLng, embLatLng, data, i, mll_lat, mll_lng, ell_lat, ell_lng );
+	}	
+       //END IMPORT EMBASSY DATA
+
+
+        var userMarker = new google.maps.Marker({
+            position: myLatLng,
+            map: map,
+            icon: im
+        });
+    }
+
+</script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBcc2O3mvsB8EmDbFeXmSda_vzRLrDz7IY&callback=initMap" async defer></script>
+    <div  id="alerts">
+    </div>
+
+
+</body>
+</html>
+
