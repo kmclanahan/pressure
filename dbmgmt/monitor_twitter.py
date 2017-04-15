@@ -242,6 +242,8 @@ def get_hour_idx(ts):
 
     return int(diff.seconds / seconds_in_hour)
 
+active_spikes = {}
+
 while True:
     print "Entering loop %s..." %loop_count
     current_time = datetime.datetime.now()
@@ -287,6 +289,7 @@ while True:
     hour_idx = get_hour_idx(current_time)
 
     spike_idx = 1
+    spikes = {}
     for idx in tweet_grid_averages:
         baseline = tweet_grid_averages[idx][hour_idx] + 1
         observed = temp_grid[idx] + 1
@@ -298,9 +301,10 @@ while True:
 
         if percent_increase > tweet_percent_threshold:
             print ">%s%% increase for sector (%s,%s): observed %s, baseline %s" %(tweet_percent_threshold, idx[0], idx[1], observed, baseline)
+            spikes[idx] = 1
             boundaries = get_lat_long_from_sector(idx)
 
-            cur.execute("SELECT tweet, ts, latitude, longitude FROM Twitter_Data WHERE latitude > '%s' and latitude < '%s' and longitude > '%s' and longitude < '%s' and ts > '%s' and ts < '%s'" %(boundaries[0], boundaries[2], boundaries[1], boundaries[3], one_hour_ago, current_time))
+            cur.execute("SELECT tweet, ts, latitude, longitude, threat_type FROM Twitter_Data WHERE latitude > '%s' and latitude < '%s' and longitude > '%s' and longitude < '%s' and ts > '%s' and ts < '%s'" %(boundaries[0], boundaries[2], boundaries[1], boundaries[3], one_hour_ago, current_time))
 
             all_data = cur.fetchall()
 
@@ -312,9 +316,10 @@ while True:
             print top_hashes
 
             num_tweets, sum_lat, sum_long = 0,0,0
+            threat_type = "Null"
             #add the tweet text 
             for data in all_data:
-                tweet, ts, latitude, longitude = data
+                tweet, ts, latitude, longitude, threat_type = data
                 cur.execute("INSERT INTO Tweet_Spike_Text (ts, spike_idx, tweet, latitude, longitude) VALUES ( %s, %s, %s, %s, %s)", (ts, spike_idx, tweet, latitude, longitude))
                 sum_lat += latitude
                 sum_long += longitude
@@ -327,8 +332,22 @@ while True:
             #add the data to the spike table
             cur.execute("INSERT INTO Tweet_Spike_Data (idx, ts, grid_idx, baseline_level, current_level, spike_percent, top_words, top_hashes, latitude, longitude) VALUES ( %s, now(), %s, %s, %s, %s, %s, %s, %s, %s)", (spike_idx, idx, baseline, observed, percent_increase, top_words, top_hashes, latitude, longitude))
 
+            #if we're not already tracking this spike, add it to the history table
+            if idx not in active_spikes and threat_type != "Fake":
+                cur.execute("INSERT INTO Tweet_Spike_History (ts, grid_idx, baseline_level, current_level, spike_percent, top_words, top_hashes, latitude, longitude) VALUES ( now(), %s, %s, %s, %s, %s, %s, %s, %s)", (idx, baseline, observed, percent_increase, top_words, top_hashes, latitude, longitude))
+
+                #get the ID for this history entry
+                cur.execute("SELECT id FROM Tweet_Spike_History ORDER BY ts DESC LIMIT 1")
+                spike_hist_id = cur.fetchall()[0]
+ 
+                for data in all_data:
+                    tweet, ts, latitude, longitude, threat_type = data
+                    cur.execute("INSERT INTO Tweet_Spike_Text_History (ts, spike_idx, tweet, latitude, longitude) VALUES ( %s, %s, %s, %s, %s)", (ts, spike_hist_id, tweet, latitude, longitude))
+
             spike_idx += 1
  
+    
+    active_spikes = spikes
 
 
     conn.commit()
