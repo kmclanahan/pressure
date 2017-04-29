@@ -258,7 +258,6 @@ while True:
     cur.execute("Truncate Tweet_Spike_Data")
     cur.execute("Truncate Tweet_Spike_Text")
 
-
     #if an hour has passed, update the grid
     if time_diff.seconds > (60 * 60):
         print "Updating grid history..."
@@ -288,7 +287,7 @@ while True:
     #get the right hour index into the grid
     hour_idx = get_hour_idx(current_time)
 
-    spike_idx = 1
+    spike_idx = 2
     spikes = {}
     for idx in tweet_grid_averages:
         baseline = tweet_grid_averages[idx][hour_idx] + 1
